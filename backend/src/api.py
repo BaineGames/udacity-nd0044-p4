@@ -44,7 +44,8 @@ def get_drinks():
 '''
 
 @app.route("/drinks-detail", methods=["GET"])
-def get_drinks_detail():
+@requires_auth("get:drinks-detail")
+def get_drinks_detail(stuff):
     formatted_drinks = [drink.long() for drink in Drink.query.all()]
     return jsonify({"success":True,"drinks":formatted_drinks}), 200
 
@@ -59,7 +60,8 @@ def get_drinks_detail():
         or appropriate status code indicating reason for failure
 '''
 @app.route("/drinks", methods=["POST"])
-def post_drinks():
+@requires_auth("post:drinks")
+def post_drinks(stuff):
     drink_title = request.json.get("title")
     drink_parts = request.json.get("recipe")
     drink = Drink(title=drink_title, recipe=json.dumps([drink_parts]))
@@ -79,7 +81,8 @@ def post_drinks():
 '''
 
 @app.route("/drinks/<int:drink_id>", methods=["PATCH"])
-def patch_drinks(drink_id):
+@requires_auth("patch:drinks")
+def patch_drinks(stuff,drink_id):
     drink_title = request.json.get("title")
     drink_parts = request.json.get("recipe")
     drink = Drink.query.get(drink_id)
@@ -92,7 +95,7 @@ def patch_drinks(drink_id):
     if drink_parts:
         drink.recipe = json.dumps(drink_parts)
     drink.update()
-    return jsonify({"success":True,"drinks":drink.long()})
+    return jsonify({"success":True,"drinks":[drink.long()]})
 
 
 
@@ -108,7 +111,8 @@ def patch_drinks(drink_id):
 '''
 
 @app.route("/drinks/<int:drink_id>", methods=["DELETE"])
-def delete_drinks(drink_id):
+@requires_auth("delete:drinks")
+def delete_drinks(stuff,drink_id):
     drink = Drink.query.get(drink_id)
     if not drink:
         return abort(404, 'drink does not exist')
@@ -156,3 +160,11 @@ def resource_not_found(error):
 @TODO implement error handler for AuthError
     error handler should conform to general task above 
 '''
+
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+                    "success": False, 
+                    "error": error.status_code,
+                    "message": error.error['description']
+                    }), error.status_code
