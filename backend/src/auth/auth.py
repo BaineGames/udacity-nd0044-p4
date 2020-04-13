@@ -86,8 +86,8 @@ def check_permissions(permission, payload):
             "code":"unauthorized",
             "description":"Permission Denied! Y u do dis?!"
         }, 403)
-
-    raise Exception('Not Implemented')
+    
+    return True
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -131,6 +131,7 @@ def verify_decode_jwt(token):
                 audience=API_AUDIENCE,
                 issuer='https://' + AUTH0_DOMAIN + '/'
             )
+            print(payload)
 
             return payload
 
