@@ -18,7 +18,7 @@ CORS(app)
 '''
 db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 '''
 @TODO implement endpoint
     GET /drinks
@@ -28,10 +28,11 @@ db_drop_and_create_all()
         or appropriate status code indicating reason for failure
 '''
 
+
 @app.route("/drinks", methods=["GET"])
 def get_drinks():
     formatted_drinks = [drink.short() for drink in Drink.query.all()]
-    return jsonify({"success":True,"drinks":formatted_drinks}), 200
+    return jsonify({"success": True, "drinks": formatted_drinks}), 200
 
 
 '''
@@ -43,11 +44,12 @@ def get_drinks():
         or appropriate status code indicating reason for failure
 '''
 
+
 @app.route("/drinks-detail", methods=["GET"])
 @requires_auth("get:drinks-detail")
 def get_drinks_detail(stuff):
     formatted_drinks = [drink.long() for drink in Drink.query.all()]
-    return jsonify({"success":True,"drinks":formatted_drinks}), 200
+    return jsonify({"success": True, "drinks": formatted_drinks}), 200
 
 
 '''
@@ -66,7 +68,8 @@ def post_drinks(stuff):
     drink_parts = request.json.get("recipe")
     drink = Drink(title=drink_title, recipe=json.dumps([drink_parts]))
     drink.insert()
-    return jsonify({"success":True,"drinks":drink.long()}), 200
+    return jsonify({"success": True, "drinks": drink.long()}), 200
+
 
 '''
 @TODO implement endpoint
@@ -80,9 +83,10 @@ def post_drinks(stuff):
         or appropriate status code indicating reason for failure
 '''
 
+
 @app.route("/drinks/<int:drink_id>", methods=["PATCH"])
 @requires_auth("patch:drinks")
-def patch_drinks(stuff,drink_id):
+def patch_drinks(stuff, drink_id):
     drink_title = request.json.get("title")
     drink_parts = request.json.get("recipe")
     drink = Drink.query.get(drink_id)
@@ -91,12 +95,11 @@ def patch_drinks(stuff,drink_id):
 
     if drink_title:
         drink.title = drink_title
-    
+
     if drink_parts:
         drink.recipe = json.dumps(drink_parts)
     drink.update()
-    return jsonify({"success":True,"drinks":[drink.long()]})
-
+    return jsonify({"success": True, "drinks": [drink.long()]})
 
 
 '''
@@ -110,33 +113,36 @@ def patch_drinks(stuff,drink_id):
         or appropriate status code indicating reason for failure
 '''
 
+
 @app.route("/drinks/<int:drink_id>", methods=["DELETE"])
 @requires_auth("delete:drinks")
-def delete_drinks(stuff,drink_id):
+def delete_drinks(stuff, drink_id):
     drink = Drink.query.get(drink_id)
     if not drink:
         return abort(404, 'drink does not exist')
 
     drink.delete()
-    return jsonify({"success":True,"delete":drink_id})
+    return jsonify({"success": True, "delete": drink_id})
 
-## Error Handling
+
+# Error Handling
 '''
 Example error handling for unprocessable entity
 '''
 @app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
-                    "error": 422,
-                    "message": "unprocessable"
-                    }), 422
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
+
 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
              jsonify({
-                    "success": False, 
+                    "success": False,
                     "error": 404,
                     "message": "resource not found"
                     }), 404
@@ -145,26 +151,29 @@ def unprocessable(error):
 
 '''
 @TODO implement error handler for 404
-    error handler should conform to general task above 
+    error handler should conform to general task above
 '''
+
 
 @app.errorhandler(404)
 def resource_not_found(error):
     return jsonify({
-                    "success": False, 
-                    "error": 404,
-                    "message": "resource not found"
-                    }), 404
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
+
 
 '''
 @TODO implement error handler for AuthError
-    error handler should conform to general task above 
+    error handler should conform to general task above
 '''
+
 
 @app.errorhandler(AuthError)
 def auth_error(error):
     return jsonify({
-                    "success": False, 
-                    "error": error.status_code,
-                    "message": error.error['description']
-                    }), error.status_code
+        "success": False,
+        "error": error.status_code,
+        "message": error.error['description']
+    }), error.status_code
